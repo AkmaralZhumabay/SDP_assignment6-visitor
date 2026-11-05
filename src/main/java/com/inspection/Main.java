@@ -6,6 +6,7 @@ import java.util.List;
 import com.inspection.visitor.ProjectStatisticsVisitor;
 import com.inspection.visitor.QualityGateVisitor;
 import com.inspection.visitor.ComplianceVisitor;
+import com.inspection.visitor.TechnicalDebtVisitor;
 
 public class Main {
 
@@ -66,5 +67,9 @@ public class Main {
         ComplianceVisitor compliance = new ComplianceVisitor();
         project.accept(compliance);
         compliance.printReport();
+
+        TechnicalDebtVisitor debt = new TechnicalDebtVisitor();
+        project.accept(debt);
+        debt.printReport();
     }
 }
