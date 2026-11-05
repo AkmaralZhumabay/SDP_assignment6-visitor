@@ -1,22 +1,23 @@
 package com.inspection;
 
 import com.inspection.element.*;
-import com.inspection.visitor.SecurityAuditVisitor;
+import com.inspection.visitor.*;
 import java.util.List;
-import com.inspection.visitor.ProjectStatisticsVisitor;
-import com.inspection.visitor.QualityGateVisitor;
-import com.inspection.visitor.ComplianceVisitor;
-import com.inspection.visitor.TechnicalDebtVisitor;
 
 public class Main {
 
     public static void main(String[] args) {
 
+        // Create project directories
         Directory project = new Directory("fintech-project");
         Directory src = new Directory("src");
-        Directory config = new Directory("config");
         Directory tests = new Directory("tests");
+        Directory config = new Directory("config");
 
+        // Nested directory for additional source files
+        Directory utils = new Directory("utils");
+
+        // Production source files
         src.add(new SourceCodeFile(
                 "PaymentService.java", 200, 12, true, true
         ));
@@ -25,19 +26,25 @@ public class Main {
                 "UserService.java", 150, 6, false, false
         ));
 
-        config.add(new ConfigurationFile(
-                "application.properties", 30, true, false, true
+        // Nested source file
+        utils.add(new SourceCodeFile(
+                "ValidationUtils.java", 80, 4, false, false
         ));
 
+        src.add(utils);
+
+        // Test files
         tests.add(new TestFile(
                 "PaymentServiceTest.java", 100, 5, "PaymentService"
         ));
 
-        project.add(src);
-        project.add(config);
-        project.add(tests);
+        // Configuration files
+        config.add(new ConfigurationFile(
+                "application.properties", 30, true, false, true
+        ));
 
-        project.add(new DependencyFile(
+        // Dependency file
+        DependencyFile pom = new DependencyFile(
                 "pom.xml",
                 List.of(
                         new DependencyFile.Dependency(
@@ -50,7 +57,17 @@ public class Main {
                                 "unapproved-library", "", false, true
                         )
                 )
-        ));
+        );
+
+        // Build the project structure
+        project.add(src);
+        project.add(tests);
+        project.add(config);
+        project.add(pom);
+
+        // Run all Visitors on the same project
+        System.out.println("SMART CODE INSPECTION ENGINE");
+        System.out.println("Project: " + project.getName());
 
         SecurityAuditVisitor security = new SecurityAuditVisitor();
         project.accept(security);
