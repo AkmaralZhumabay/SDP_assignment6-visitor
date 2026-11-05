@@ -5,6 +5,7 @@ import com.inspection.visitor.SecurityAuditVisitor;
 import java.util.List;
 import com.inspection.visitor.ProjectStatisticsVisitor;
 import com.inspection.visitor.QualityGateVisitor;
+import com.inspection.visitor.ComplianceVisitor;
 
 public class Main {
 
@@ -43,6 +44,9 @@ public class Main {
                         ),
                         new DependencyFile.Dependency(
                                 "old-library", "1.0", true, false
+                        ),
+                        new DependencyFile.Dependency(
+                                "unapproved-library", "", false, true
                         )
                 )
         ));
@@ -58,5 +62,9 @@ public class Main {
         QualityGateVisitor quality = new QualityGateVisitor();
         project.accept(quality);
         quality.printReport();
+
+        ComplianceVisitor compliance = new ComplianceVisitor();
+        project.accept(compliance);
+        compliance.printReport();
     }
 }
