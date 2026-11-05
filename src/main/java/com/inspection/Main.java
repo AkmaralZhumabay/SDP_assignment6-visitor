@@ -1,17 +1,46 @@
 package com.inspection;
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
-public class Main {
-    public static void main(String[] args) {
-        //TIP Press <shortcut actionId="ShowIntentionActions"/> with your caret at the highlighted text
-        // to see how IntelliJ IDEA suggests fixing it.
-        System.out.printf("Hello and welcome!");
+import com.inspection.element.*;
+import com.inspection.visitor.SecurityAuditVisitor;
+import java.util.List;
 
-        for (int i = 1; i <= 5; i++) {
-            //TIP Press <shortcut actionId="Debug"/> to start debugging your code. We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-            // for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.
-            System.out.println("i = " + i);
-        }
+public class Main {
+
+    public static void main(String[] args) {
+
+        Directory project = new Directory("fintech-project");
+        Directory src = new Directory("src");
+        Directory config = new Directory("config");
+
+        src.add(new SourceCodeFile(
+                "PaymentService.java", 200, 12, true, true
+        ));
+
+        src.add(new SourceCodeFile(
+                "UserService.java", 150, 6, false, false
+        ));
+
+        config.add(new ConfigurationFile(
+                "application.properties", 30, true, false, true
+        ));
+
+        project.add(src);
+        project.add(config);
+
+        project.add(new DependencyFile(
+                "pom.xml",
+                List.of(
+                        new DependencyFile.Dependency(
+                                "spring-core", "6.1.0", false, false
+                        ),
+                        new DependencyFile.Dependency(
+                                "old-library", "1.0", true, false
+                        )
+                )
+        ));
+
+        SecurityAuditVisitor security = new SecurityAuditVisitor();
+        project.accept(security);
+        security.printReport();
     }
 }
