@@ -1,0 +1,136 @@
+@startuml
+title Smart Code Inspection Engine - Class Diagram
+
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+
+interface ProjectElement {
+    +accept(visitor: ProjectVisitor): void
+}
+
+class SourceCodeFile {
+    -name: String
+    -linesOfCode: int
+    -complexity: int
+    -hasHardcodedCredentials: boolean
+    -highRisk: boolean
+    +accept(visitor: ProjectVisitor): void
+}
+
+class TestFile {
+    -name: String
+    -linesOfCode: int
+    -testCount: int
+    -testedClass: String
+    +accept(visitor: ProjectVisitor): void
+}
+
+class ConfigurationFile {
+    -name: String
+    -linesOfCode: int
+    -debugEnabled: boolean
+    -encryptionEnabled: boolean
+    -hasExposedCredentials: boolean
+    +accept(visitor: ProjectVisitor): void
+}
+
+class DependencyFile {
+    -name: String
+    -dependencies: List<Dependency>
+    +accept(visitor: ProjectVisitor): void
+}
+
+class "DependencyFile.Dependency" as Dependency {
+    +name: String
+    +version: String
+    +vulnerable: boolean
+    +prohibited: boolean
+}
+
+class Directory {
+    -name: String
+    -children: List<ProjectElement>
+    +add(element: ProjectElement): void
+    +getChildren(): List<ProjectElement>
+    +accept(visitor: ProjectVisitor): void
+}
+
+ProjectElement <|.. SourceCodeFile
+ProjectElement <|.. TestFile
+ProjectElement <|.. ConfigurationFile
+ProjectElement <|.. DependencyFile
+ProjectElement <|.. Directory
+
+Directory "1" o-- "0..*" ProjectElement : contains
+DependencyFile "1" *-- "0..*" Dependency : dependencies
+
+interface ProjectVisitor {
+    +visit(file: SourceCodeFile): void
+    +visit(file: TestFile): void
+    +visit(file: ConfigurationFile): void
+    +visit(file: DependencyFile): void
+    +visit(directory: Directory): void
+}
+
+class SecurityAuditVisitor {
+    -criticalIssues: int
+    -highIssues: int
+    -issues: List<String>
+    +getSecurityScore(): int
+    +printReport(): void
+}
+
+class ProjectStatisticsVisitor {
+    -totalFiles: int
+    -totalLinesOfCode: int
+    -sourceFiles: int
+    -testFiles: int
+    -totalDependencies: int
+    -totalComplexity: int
+    +getAverageComplexity(): double
+    +getTestSourceRatio(): double
+    +printReport(): void
+}
+
+class QualityGateVisitor {
+    -security: SecurityAuditVisitor
+    -statistics: ProjectStatisticsVisitor
+    +isSecurityPassed(): boolean
+    +isComplexityPassed(): boolean
+    +isTestsPassed(): boolean
+    +isReleaseReady(): boolean
+    +printReport(): void
+}
+
+class ComplianceVisitor {
+    -violations: List<String>
+    -sourceClasses: Set<String>
+    -testedClasses: Set<String>
+    +getViolations(): List<String>
+    +isCompliant(): boolean
+    +printReport(): void
+}
+
+class TechnicalDebtVisitor {
+    -issues: List<String>
+    -sourceClasses: Set<String>
+    -testedClasses: Set<String>
+    -estimatedHours: int
+    +getEstimatedHours(): int
+    +getIssues(): List<String>
+    +printReport(): void
+}
+
+ProjectVisitor <|.. SecurityAuditVisitor
+ProjectVisitor <|.. ProjectStatisticsVisitor
+ProjectVisitor <|.. QualityGateVisitor
+ProjectVisitor <|.. ComplianceVisitor
+ProjectVisitor <|.. TechnicalDebtVisitor
+
+QualityGateVisitor *-- SecurityAuditVisitor
+QualityGateVisitor *-- ProjectStatisticsVisitor
+
+ProjectElement ..> ProjectVisitor : accept(visitor)
+ProjectVisitor ..> ProjectElement : visit(element)
+
+@enduml

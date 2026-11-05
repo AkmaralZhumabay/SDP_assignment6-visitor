@@ -1,0 +1,54 @@
+@startuml
+title Security Audit - Visitor Sequence Diagram
+
+actor User
+participant "Main" as Main
+participant "project: Directory" as Project
+participant "security: SecurityAuditVisitor" as Visitor
+participant "src: Directory" as Src
+participant "file: SourceCodeFile" as File
+
+User -> Main : run()
+activate Main
+
+Main -> Visitor : new SecurityAuditVisitor()
+Main -> Project : accept(security)
+activate Project
+
+Project -> Visitor : visit(project)
+activate Visitor
+
+Visitor -> Src : accept(security)
+activate Src
+
+Src -> Visitor : visit(src)
+
+Visitor -> File : accept(security)
+activate File
+
+File -> Visitor : visit(file)
+
+note right of Visitor
+Checks:
+- Hardcoded credentials
+- High-risk source file
+end note
+
+Visitor --> File : return
+deactivate File
+
+Visitor --> Src : return
+deactivate Src
+
+Visitor --> Project : return
+deactivate Visitor
+deactivate Src
+deactivate Project
+
+Main -> Visitor : printReport()
+Visitor --> Main : security report
+
+Main --> User : display results
+deactivate Main
+
+@enduml
