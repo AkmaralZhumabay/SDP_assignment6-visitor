@@ -3,6 +3,7 @@ package com.inspection;
 import com.inspection.element.*;
 import com.inspection.visitor.SecurityAuditVisitor;
 import java.util.List;
+import com.inspection.visitor.ProjectStatisticsVisitor;
 
 public class Main {
 
@@ -11,6 +12,7 @@ public class Main {
         Directory project = new Directory("fintech-project");
         Directory src = new Directory("src");
         Directory config = new Directory("config");
+        Directory tests = new Directory("tests");
 
         src.add(new SourceCodeFile(
                 "PaymentService.java", 200, 12, true, true
@@ -24,8 +26,13 @@ public class Main {
                 "application.properties", 30, true, false, true
         ));
 
+        tests.add(new TestFile(
+                "PaymentServiceTest.java", 100, 5, "PaymentService"
+        ));
+
         project.add(src);
         project.add(config);
+        project.add(tests);
 
         project.add(new DependencyFile(
                 "pom.xml",
@@ -42,5 +49,9 @@ public class Main {
         SecurityAuditVisitor security = new SecurityAuditVisitor();
         project.accept(security);
         security.printReport();
+
+        ProjectStatisticsVisitor statistics = new ProjectStatisticsVisitor();
+        project.accept(statistics);
+        statistics.printReport();
     }
 }
